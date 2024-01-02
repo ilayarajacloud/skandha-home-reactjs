@@ -1,8 +1,65 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
+import { ToastContainer, toast } from 'react-toastify';
+import {axiosInstance} from "../../features/service/config";
+import { useDispatch, useSelector } from 'react-redux';
+import {updatePlotFacing} from "../../features/redux/slice/plotFacingSlice";
 
 const PropertyPlotFacing = () => {
+
+  const [showModel, setShowModel] = useState(false);
+  const [plotState, setPlotState] = useState({
+    plotFacing: ""
+  })
+  const dispatch = useDispatch();
+  const data = useSelector((state)=>{
+    return state.facing.plotFacingList
+  })
+
+  const handleShowModel = () => {
+    setShowModel(true)
+  }
+  const handleCloseModel = () => {
+    setShowModel(!true)
+  }
+  const onChangeHandler = (name, value) => {
+    setPlotState({
+      ...plotState,
+      [name]: value
+    })
+  }
+
+  useEffect(()=>{
+    getPlotFacingApi()
+  },[])
+
+  const getPlotFacingApi=async()=>{
+    try{
+      const{data}=await axiosInstance.get("PlotFacingApi/get")
+      dispatch(
+        updatePlotFacing(data)
+      )
+   }catch(error){
+      console.log(error);
+   }
+  }
+
+  const addPlotFacing=async(e)=>{
+    e.preventDefalut();
+   
+  }
+
+  const onDeleteStatus=async(id)=>{
+    try{
+      const{data} =await axiosInstance.delete(`PlotFacingApi/Delete/${id}`)
+      toast("Delete Successfully");
+      getPlotFacingApi();
+    }catch(error){
+      console.log(error);
+    }
+  }
+
   return (
-<div id="main-content">
+    <div id="main-content">
       <div className="container-fluid">
         <div className="block-header">
           <div className="row">
@@ -15,7 +72,7 @@ const PropertyPlotFacing = () => {
                   </a>
                 </li>
                 <li className="breadcrumb-item">Property</li>
-                <li className="breadcrumb-item active">Project Location</li>
+                <li className="breadcrumb-item active">Plot Facing</li>
               </ul>
             </div>
             <div className="col-lg-6 col-md-6 col-sm-12">
@@ -28,7 +85,7 @@ const PropertyPlotFacing = () => {
                     onClick={handleShowModel}
                   >
                     <i className="fa fa-download" />
-                    Add Location
+                    Add Plot Facing
                   </button>
                   <div
                     className={`modal fade ${showModel ? 'show' : ''}`} id="exampleModal"
@@ -42,7 +99,7 @@ const PropertyPlotFacing = () => {
                       <div className="modal-content">
                         <div className="modal-header">
                           <h5 className="modal-title" id="exampleModalLabel">
-                            Add Source
+                            Add Plot Facing
                           </h5>
                           <button
                             type="button"
@@ -61,13 +118,13 @@ const PropertyPlotFacing = () => {
                                 htmlFor="recipient-name"
                                 className="col-form-label"
                               >
-                                Location Name:
+                                Plot Facing
                               </label>
                               <input
                                 type="text"
                                 className="form-control"
-                                value={statusState.statusName}
-                                onChange={(e) => onChangeHandler("statusName", e.target.value)}
+                                value={plotState.plotFacing}
+                                onChange={(e) => onChangeHandler("plotFacing", e.target.value)}
                               />
                             </div>
                           </form>
@@ -84,7 +141,8 @@ const PropertyPlotFacing = () => {
                           <button
                             type="button"
                             className="btn btn-primary"
-                            // onClick={updateId?update:addStatus}
+                            onClick={addPlotFacing}
+                          // onClick={updateId?update:addStatus}
                           >
                             {/* {updateId ? "Update" : "Add"}  */}Add
                           </button>
@@ -106,40 +164,40 @@ const PropertyPlotFacing = () => {
                 <thead>
                   <tr>
                     <td>S.No</td>
-                    <td>Location Name</td>
+                    <td>Plot Facing</td>
                     <td>Created By</td>
                     <td>Created On</td>
                     <td>Action</td>
                   </tr>
                 </thead>
-                {/* <tbody>
+                <tbody>
                   {
                     data.map((item, index) => {
                       return (
-                        <tr key={item.id}>
+                        <tr key={item.plotFacingId}>
                           <td>{index + 1}</td>
-                          <td>{item.statusName}</td>
+                          <td>{item.plotFacing}</td>
                           <td>{item.createdBy}</td>
-                          <td>{item.createdAt}</td>
+                          <td>{item.createdOn}</td>
                           <td>
-                            <button type="button" className="btn btn-info" title="Edit" onClick={() => onEditStatus(item.id)}><i
-                              className="fa fa-edit"></i></button>
+                            {/* <button type="button" className="btn btn-info" title="Edit" onClick={() => onEditStatus(item.id)}><i
+                              className="fa fa-edit"></i></button> */}
                             <button type="button" data-type="confirm"
-                              className="btn btn-danger js-sweetalert" title="Delete" onClick={() => onDeleteStatus(item.id)}><i
+                              className="btn btn-danger js-sweetalert" title="Delete" onClick={() => onDeleteStatus(item.plotFacingId)}><i
                                 className="fa fa-trash-o"></i></button>
                           </td>
                         </tr>
                       )
                     })
                   }
-                </tbody> */}
+                </tbody>
               </table>
             </div>
           </div>
         </div>
       </div>
       <ToastContainer autoClose={900} />
-    </div>  )
+    </div>)
 }
 
 export default PropertyPlotFacing

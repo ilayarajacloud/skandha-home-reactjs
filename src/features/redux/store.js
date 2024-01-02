@@ -8,6 +8,7 @@ import deadListReducer from './slice/deadListSlice';
 import emplyeeReducer from './slice/emplyoeeListSlice';
 import sourceReducer from './slice/sourceSlice';
 import statusReducer from './slice/statusSlice';
+import plotFacingReducer from './slice/plotFacingSlice';
 
 export const store = configureStore({
   reducer : {
@@ -19,5 +20,6 @@ export const store = configureStore({
     employee : emplyeeReducer,
     source : sourceReducer,
     status : statusReducer,
+    facing : plotFacingReducer,
   }
 })
