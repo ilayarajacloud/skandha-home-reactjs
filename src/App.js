@@ -33,6 +33,7 @@ function App() {
           <Route path='dashboard' element={<Dashboard />} />
           <Route path='overview' element={<Overview />} />
           <Route path='newlead' element={<NewLead />} />
+          <Route path='newlead/:id' element={<NewLead />} />
           <Route path='leadList' element={<LeadList />} />
           <Route path='leadsource' element={<LeadSource />} />
           <Route path='leadstatus' element={<LeadStatus />} />

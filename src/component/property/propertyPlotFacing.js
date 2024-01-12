@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { ToastContainer, toast } from 'react-toastify';
-import {axiosInstance} from "../../features/service/config";
+import { axiosInstance } from "../../features/service/config";
 import { useDispatch, useSelector } from 'react-redux';
-import {updatePlotFacing} from "../../features/redux/slice/plotFacingSlice";
+import { updatePlotFacing } from "../../features/redux/slice/plotFacingSlice";
 
 const PropertyPlotFacing = () => {
 
@@ -10,8 +10,11 @@ const PropertyPlotFacing = () => {
   const [plotState, setPlotState] = useState({
     plotFacing: ""
   })
+  const [updateId, setUpdateId] = useState("");
+  console.log(updateId);
+
   const dispatch = useDispatch();
-  const data = useSelector((state)=>{
+  const data = useSelector((state) => {
     return state.facing.plotFacingList
   })
 
@@ -28,32 +31,62 @@ const PropertyPlotFacing = () => {
     })
   }
 
-  useEffect(()=>{
+  useEffect(() => {
     getPlotFacingApi()
-  },[])
+  }, [])
 
-  const getPlotFacingApi=async()=>{
-    try{
-      const{data}=await axiosInstance.get("PlotFacingApi/get")
+  const getPlotFacingApi = async () => {
+    try {
+      const { data } = await axiosInstance.get("PlotFacingApi/get")
       dispatch(
         updatePlotFacing(data)
       )
-   }catch(error){
+    } catch (error) {
       console.log(error);
-   }
+    }
   }
 
-  const addPlotFacing=async(e)=>{
-    e.preventDefalut();
-   
+  const addPlotFacing = async (e) => {
+    e.preventDefault()
+    try {
+      const { data } = await axiosInstance.post(`PlotFacingApi/post`, { ...plotState })
+      toast("Add property Facing Successfully");
+      handleCloseModel()
+      getPlotFacingApi()
+    } catch (error) {
+      console.log(error);
+    }
   }
 
-  const onDeleteStatus=async(id)=>{
-    try{
-      const{data} =await axiosInstance.delete(`PlotFacingApi/Delete/${id}`)
+  const onDeleteFacing = async (id) => {
+    try {
+      const { data } = await axiosInstance.delete(`PlotFacingApi/Delete/${id}`)
       toast("Delete Successfully");
       getPlotFacingApi();
-    }catch(error){
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const onEditFacing = (id) => {
+    getplotFcaingApi(id)
+    setUpdateId(id)
+  }
+
+  const getplotFcaingApi=async(id)=>{
+    try {
+      const {data} =await axiosInstance.get(`PlotFacingApi/${id}`)
+      setPlotState(data);
+      handleShowModel()
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const updatePlotFacing =async () => {
+    try {
+     const {data} =await axiosInstance.put(`PlotFacingApi/Update/${updateId}`, {...plotState})
+    } catch (error) {
       console.log(error);
     }
   }
@@ -141,10 +174,9 @@ const PropertyPlotFacing = () => {
                           <button
                             type="button"
                             className="btn btn-primary"
-                            onClick={addPlotFacing}
-                          // onClick={updateId?update:addStatus}
+                            onClick={updateId ? updatePlotFacing : addPlotFacing}
                           >
-                            {/* {updateId ? "Update" : "Add"}  */}Add
+                            {updateId ? "Update" : "Add"}
                           </button>
                         </div>
                       </div>
@@ -180,10 +212,10 @@ const PropertyPlotFacing = () => {
                           <td>{item.createdBy}</td>
                           <td>{item.createdOn}</td>
                           <td>
-                            {/* <button type="button" className="btn btn-info" title="Edit" onClick={() => onEditStatus(item.id)}><i
-                              className="fa fa-edit"></i></button> */}
+                            <button type="button" className="btn btn-info" title="Edit" onClick={() => onEditFacing(item.plotFacingId)}><i
+                              className="fa fa-edit"></i></button>
                             <button type="button" data-type="confirm"
-                              className="btn btn-danger js-sweetalert" title="Delete" onClick={() => onDeleteStatus(item.plotFacingId)}><i
+                              className="btn btn-danger js-sweetalert" title="Delete" onClick={() => onDeleteFacing(item.plotFacingId)}><i
                                 className="fa fa-trash-o"></i></button>
                           </td>
                         </tr>

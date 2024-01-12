@@ -2,6 +2,8 @@ import React, { useEffect } from 'react';
 import { axiosInstance } from "../../features/service/config";
 import { useDispatch, useSelector } from 'react-redux';
 import { updateLeadList, leadList } from "../../features/redux/slice/leadListSlice";
+import { toast, ToastContainer } from 'react-toastify';
+import { Link } from 'react-router-dom';
 
 const LeadList = () => {
 
@@ -11,8 +13,6 @@ const LeadList = () => {
     return state.lead.leadList
   })
 
-  console.log(data);
-
   useEffect(() => {
     getLeadListApi();
   }, [])
@@ -20,7 +20,6 @@ const LeadList = () => {
   const getLeadListApi = async () => {
     try {
       const { data } = await axiosInstance.get("LeadApi/GetLead")
-      console.log(data);
       dispatch(
         updateLeadList(data)
       );
@@ -28,6 +27,18 @@ const LeadList = () => {
       console.log(error, "error")
     }
   }
+
+  const deleteNewLead=async(id)=>{
+    try{
+      const{data} =await axiosInstance.delete(`LeadApi/Delete/${id}`)
+      toast("New Lead Delete Successfully");
+      getLeadListApi();
+    }catch(error){
+      console.log(error);
+    }
+  }
+
+
   return (
     <>
       <div id="main-content">
@@ -142,10 +153,12 @@ const LeadList = () => {
                               <td>{item.leadSource}</td>
                               <td>{item.createdOn}</td>
                               <td>
+                                <Link to={`/newlead/${item.id}`}>
                                 <button type="button" class="btn btn-info" title="Edit"><i
                                   class="fa fa-edit"></i></button>
+                                  </Link>
                                 <button type="button" data-type="confirm"
-                                  class="btn btn-danger js-sweetalert" title="Delete"><i
+                                  class="btn btn-danger js-sweetalert" title="Delete" onClick={()=>deleteNewLead(item.id)}><i
                                     class="fa fa-trash-o"></i></button>
                               </td>
                             </tr>
@@ -247,7 +260,7 @@ const LeadList = () => {
           </div>
         </div>
       </div>
-
+      <ToastContainer autoClose={900} />
     </>
   )
 }

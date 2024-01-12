@@ -3,14 +3,18 @@ import { ToastContainer, toast } from 'react-toastify';
 import { axiosInstance } from '../../features/service/config';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateStatus } from "../../features/redux/slice/statusSlice";
-const LeadStatus = () => {
-  const dispatch = useDispatch()
-  const [showModel, setShowModel] = useState(false);
-  const [statusState, setStatusState] = useState({
-    statusName: "",
+
+const proStatus ={
+  statusName: "",
     createdBy: "Admin",
     createdAt: new Date()
-  })
+}
+
+const LeadStatus = () => {
+  
+  const dispatch = useDispatch()
+  const [showModel, setShowModel] = useState(false);
+  const [statusState, setStatusState] = useState(proStatus)
 
   const [updateId, setUpdateId] = useState("")
 
@@ -52,7 +56,7 @@ const LeadStatus = () => {
   const addStatus = async (e) => {
     e.preventDefault();
     try {
-      const { data } = await axiosInstance.post("LeadStatusApi/Post", { ...statusState })
+      const { data } = await axiosInstance.post("LeadStatusApi/Post", { ...statusState }, {headers: { 'Content-Type': "multipart/form-data" }})
       toast("Add Success");
       handleCloseModel();
       getstatusFromApi();
@@ -81,6 +85,7 @@ const LeadStatus = () => {
      toast("update Successfully");
      handleCloseModel();
      getstatusFromApi();
+     setStatusState(proStatus)
      
     }catch(error){
       console.log(error);

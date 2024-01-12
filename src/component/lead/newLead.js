@@ -1,178 +1,137 @@
 import React, { useState, useEffect } from 'react';
 import { axiosInstance } from "../../features/service/config"
-import { useNavigate, useParams } from 'react-router-dom';
+import { updateProjectLocation } from "../../features/redux/slice/locationSlice"
+import { updatePlotFacing } from "../../features/redux/slice/plotFacingSlice"
+import { updateSourceList } from "../../features/redux/slice/sourceSlice"
 import { useDispatch, useSelector } from 'react-redux';
-import { updateProjectLocation } from '../../features/redux/slice/locationSlice';
+import { ToastContainer, toast } from 'react-toastify';
+import { useNavigate, useParams } from 'react-router-dom';
+
+const leadPro = {
+  "firstName": "",
+  "lastName": "",
+  "mobile": "",
+  "email": "",
+  "gender": "",
+  "whatsApp": "",
+  "address": "",
+  "city": "",
+  "working": "",
+  "companyName": "",
+  "jobTitle": "",
+  "landExpectation": "",
+  "expectedSqFt": "",
+  "expectedBudget": "",
+  "leadSource": "",
+  "leadStatus": "",
+  "typeOfPurchase": "",
+  "purposeOfBuying": "",
+  "recept": "",
+  "advancedPay": "",
+  "createdBy": "",
+  "reason": "",
+  "followup": "",
+  "modeOfTransport": "",
+  "pickupLocation": "",
+  "pickupTime": "",
+  "projectLocation": "",
+}
 
 const NewLead = () => {
-
-  const navigate = useNavigate()
-  const { id } = useParams();
+  const [leadState, setLeadState] = useState(leadPro)
   const dispatch = useDispatch();
-  console.log("id", id);
+  const navigate = useNavigate()
 
-  const location = useSelector((state, action) => {
+  const { id } = useParams()
+
+  useEffect(() => {
+    findNewleadApi(id)
+  }, [id])
+
+  const findNewleadApi = async (id) => {
+    try {
+      const { data } = await axiosInstance.get(`LeadApi/${id}`)
+      setLeadState(data);
+    } catch (error) {
+
+    }
+  }
+
+  const location = useSelector((state) => {
     return state.location.projectLocation
   })
 
+  const facing = useSelector((state) => {
+    return state.facing.plotFacingList
+  })
+
+  const source = useSelector((state) => {
+    return state.source.sourceList
+  })
+
+
+  const onChangeHandler = (name, value) => {
+    setLeadState({
+      ...leadState,
+      [name]: value
+    })
+  }
+  const addNewLead = async (e) => {
+    e.preventDefault();
+    if (id) {
+       try {
+        const { data } = await axiosInstance.put(`LeadApi/Put/${id}`, { ...leadState })
+        toast("Update New Lead Suceess");
+        alert("update successfully")
+        navigate('/leadList')
+       } catch (error) {
+        console.log(error);
+       }
+    } else {
+      try {
+        const { data } = await axiosInstance.post("LeadApi/PostApi", { ...leadState })
+        toast("Add New Lead Suceess");
+        navigate('/leadList')
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  }
+
   const projectLocationApi = async () => {
-    const { data } = await axiosInstance.get("https://app.mycllc.ca/skandha-api/ProjectLocationApi/get");
-    console.log(data);
+    const { data } = await axiosInstance.get("ProjectLocationApi/get");
     dispatch(
       updateProjectLocation(data)
     )
   }
-  useEffect(() => {
-    projectLocationApi();
-  }, [])
-  console.log(location);
 
-  // step 1 Initialvalue
-
-  const [newLead, setNewLead] = useState({
-    // firstName: "",
-    // lastName: "",
-    // mobile: "",
-    // email: "",
-    // gender: "",
-    // whatsApp: "",
-    // address: "",
-    // city: "",
-    // working: "",
-    // companyName: "",
-    // jobTitle: "",
-    // landExpectation: "",
-    // expectedSqFt: "",
-    // expectedBudget: "",
-    // leadSource: "",
-    // leadStatus: "",
-    // typeOfPurchase: "",
-    // purposeOfBuying: "",
-    // projectLocation: "",
-    // modeOfTransport: "",
-    // pickupLocation: "",
-    // pickupTime: "",
-    // reason: "",
-    // createdBy: "",
-    // isCustomer: "",
-    // recept: "",
-    // registrationDate: "2023-07-26T10:45:01.014Z",
-    // advancedPay: ""
-      "firstName": "string",
-      "lastName": "string",
-      "mobile": "string",
-      "email": "string",
-      "gender": "string",
-      "whatsApp": "string",
-      "address": "string",
-      "city": "string",
-      "working": "string",
-      "companyName": "string",
-      "jobTitle": "string",
-      "landExpectation": "string",
-      "expectedSqFt": "string",
-      "expectedBudget": 0,
-      "leadSource": "string",
-      "leadStatus": "string",
-      "typeOfPurchase": "string",
-      "purposeOfBuying": "string",
-      "isCustomer": true,
-      "recept": "string",
-      "registrationDate": "2023-12-22T12:32:30.145Z",
-      "advancedPay": "string",
-      "createdBy": "string",
-      "reason": "string",
-      "createdOn": "2023-12-22T12:32:30.145Z",
-      "lastUpdatedOn": "2023-12-22T12:32:30.145Z",
-      "followup": "2023-12-22T12:32:30.145Z",
-      "modeOfTransport": "string",
-      "pickupLocation": "string",
-      "pickupTime": "2023-12-22T12:32:30.145Z",
-      "projectLocation": "string",
-      "isCheckboxDisabled": true
-  })
-
-  // step 2 update the value based on user input
-  const onChangeHandler = (name, value) => {
-    console.log(name);
-    console.log(value);
-    setNewLead({
-      ...newLead,
-      [name]: value
-    })
-  }
-
-  // Step 3 submit form
-
-  const addNewLead = async (e) => {
-    e.preventDefault();
+  const getPlotFacingApi = async () => {
     try {
-      const { data } = await axiosInstance.post("LeadApi/PostApi", { ...newLead });
-      debugger;
+      const { data } = await axiosInstance.get("PlotFacingApi/get")
+      dispatch(
+        updatePlotFacing(data)
+      )
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
   }
 
-  // const addNewLead = async (e) => {
-  //   e.preventDefault();
+  const leadSourceApi = async () => {
+    try {
+      const { data } = await axiosInstance.get("LeadSourceApi/Get")
+      dispatch(
+        updateSourceList(data)
+      )
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
-  //   try {
-  //     const { data } = await axiosInstance.post("LeadApi/PostApi", newLead);
-  //     if (data?.id) {
-  //       alert("Lead Added sucessfully");
-  //       navigate("/leadlist");
-  //     } else {
-  //       alert("Somthing went wrong");
-  //     }
-  //     console.log(data, "getValue");
-  //     // dispatch(
-  //     //   updateLeadList(data),
-  //     // )
-  //     console.log(newLead, "newlead");
-  //   } catch (e) {
-  //     alert(e.message)
-  //   }
-  // }
-
-  // const updateLead = async (e) => {
-  //   e.preventDefault();
-
-  //   try {
-  //     const { data } = await axiosInstance.put(`/LeadApi/Put/${id}`, newLead);
-  //     console.log(data);
-  //     if (data) {
-  //       alert("Lead updated sucessfully");
-  //       navigate("/leadlist");
-  //     } else {
-  //       alert("Somthing went wrong");
-  //     }
-  //     console.log(data, "getValue");
-  //     // dispatch(
-  //     //   updateLeadList(data),
-  //     // )
-  //     console.log(newLead, "newlead");
-  //   } catch (e) {
-  //     alert(e.message)
-  //   }
-  // }
-
-
-  // const getLeadListFromApi = async (id) => {
-  //   try {
-  //     const { data } = await axiosInstance.get(`LeadApi/${id}`);
-  //     console.log(data, "getValue");
-  //     setNewLead({
-  //       ...data
-  //     })
-  //   } catch (e) {
-  //     alert(e.message)
-  //   }
-  // }
-
-  // useEffect(() => {
-  //   if (id) getLeadListFromApi(id)
-  // }, [])
+  useEffect(() => {
+    projectLocationApi();
+    getPlotFacingApi();
+    leadSourceApi();
+  }, [])
   return (
     <div id="main-content">
       <div className="container-fluid">
@@ -213,12 +172,10 @@ const NewLead = () => {
                         <input
                           type="text"
                           className="form-control"
-                          value={newLead.firstName}
+                          value={leadState.firstName}
                           onChange={(e) => onChangeHandler("firstName", e.target.value)}
                         />
-                        <div className="invalid-feedback">
-                          Please provide a 'Firstname'.
-                        </div>
+                        {leadState.firstName==0 && <span className='text-danger'>Please Enter Your Name</span>}
                       </div>
                     </div>
                     <div className="col-sm-3">
@@ -229,12 +186,12 @@ const NewLead = () => {
                         <input
                           type="text"
                           className="form-control"
-                          value={newLead.lastName}
+                          value={leadState.lastName}
                           onChange={(e) => onChangeHandler("lastName", e.target.value)}
                         />
-                        <div className="invalid-feedback">
+                        {leadState.lastName ==0 && <span className="text-danger">
                           Please provide a 'Lastname'.
-                        </div>
+                        </span>}
                       </div>
                     </div>
                     <div className="col-sm-3">
@@ -246,12 +203,12 @@ const NewLead = () => {
                         <input
                           type="number"
                           className="form-control"
-                          value={newLead.mobile}
+                          value={leadState.mobile}
                           onChange={(e) => onChangeHandler("mobile", e.target.value)}
                         />
-                        <div className="invalid-feedback">
+                        {leadState.mobile ==0 && <span className="text-danger">
                           Please provide a 'Number'.
-                        </div>
+                        </span>}
                       </div>
                     </div>
                     <div className="col-sm-3 ">
@@ -262,12 +219,12 @@ const NewLead = () => {
                         <input
                           type="text"
                           className="form-control"
-                          value={newLead.email}
+                          value={leadState.email}
                           onChange={(e) => onChangeHandler("email", e.target.value)}
                         />
-                        <div className="invalid-feedback">
+                        {leadState.email ==0 && <span className="text-danger">
                           Please provide a 'Email'.
-                        </div>
+                        </span>}
                       </div>
                     </div>
                     <div className="col-sm-3">
@@ -276,8 +233,8 @@ const NewLead = () => {
                           Gender
                         </label>
                         <select className="form-control"
-                          onChange={(e) => onChangeHandler('gender', e.target.value)}
-                          value={newLead.gender}
+                          value={leadState.gender}
+                          onChange={(e) => onChangeHandler("gender", e.target.value)}
                         >
                           <option selected="" disabled="" value="">
                             Choose...
@@ -285,9 +242,9 @@ const NewLead = () => {
                           <option value="male">Male</option>
                           <option value="female">Female</option>
                         </select>
-                        <div className="invalid-feedback">
-                          Please select a 'Gender'.
-                        </div>
+                        {leadState.email ==0 && <span className="text-danger">
+                          Please provide a 'Email'.
+                        </span>}
                       </div>
                     </div>
                     <div className="col-sm-3">
@@ -299,25 +256,24 @@ const NewLead = () => {
                         <input
                           type="number"
                           className="form-control"
-                          value={newLead.whatsApp}
-                          onChange={(e) => onChangeHandler('whatsApp', e.target.value)}
+                          value={leadState.whatsApp}
+                          onChange={(e) => onChangeHandler("whatsApp", e.target.value)}
                         />
-                        <div className="invalid-feedback">
-                          Please provide a 'Whatsapp number'.
-                        </div>
+                           {leadState.email ==0 && <span className="text-danger">
+                          Please provide a 'Email'.
+                        </span>}
                       </div>
                     </div>
                     <div className="col-sm-3">
                       <div className="form-group">
                         <label htmlFor="address" className="form-label">
-                          {" "}
                           Address{" "}
                         </label>
                         <input
                           type="text"
                           className="form-control"
-                          value={newLead.address}
-                          onChange={(e) => onChangeHandler('address', e.target.value)}
+                          value={leadState.address}
+                          onChange={(e) => onChangeHandler("address", e.target.value)}
                         />
                         <div className="invalid-feedback">
                           Please provide a 'Address'.
@@ -333,8 +289,8 @@ const NewLead = () => {
                         <input
                           type="text"
                           className="form-control"
-                          value={newLead.city}
-                          onChange={(e) => onChangeHandler('city', e.target.value)}
+                          value={leadState.city}
+                          onChange={(e) => onChangeHandler("city", e.target.value)}
                         />
                         <div className="invalid-feedback">
                           Please provide a 'City'.
@@ -361,8 +317,8 @@ const NewLead = () => {
                         <input
                           type="text"
                           className="form-control custom-select"
-                          value={newLead.working}
-                          onChange={(e) => onChangeHandler('working', e.target.value)}
+                          value={leadState.working}
+                          onChange={(e) => onChangeHandler("working", e.target.value)}
                         />
                       </div>
                     </div>
@@ -372,8 +328,8 @@ const NewLead = () => {
                         <input
                           type="text"
                           className="form-control custom-select"
-                          value={newLead.companyName}
-                          onChange={(e) => onChangeHandler('companyName', e.target.value)}
+                          value={leadState.companyName}
+                          onChange={(e) => onChangeHandler("companyName", e.target.value)}
                         />
                       </div>
                     </div>
@@ -383,8 +339,9 @@ const NewLead = () => {
                         <input
                           type="text"
                           className="form-control custom-select"
-                          value={newLead.jobTitle}
-                          onChange={(e) => onChangeHandler('jobTitle', e.target.value)} />
+                          value={leadState.jobTitle}
+                          onChange={(e) => onChangeHandler("jobTitle", e.target.value)}
+                        />
                       </div>
                     </div>
                   </div>
@@ -409,17 +366,14 @@ const NewLead = () => {
                             </label>
                             <select
                               className="form-control show-tick"
-                              value={newLead.landExpectation}
-                              onChange={(e) => onChangeHandler('landExpectation', e.target.value)}
+                              value={leadState.landExpectation}
+                              onChange={(e) => onChangeHandler("landExpectation", e.target.value)}
                             >
-                              <option selected="" disabled="" value="">
-                                Select Direction
-                              </option>
-                              <option value="North Facing">North Facing</option>
-                              <option value="South Facing">South facing</option>
-                              <option value="East Facing">East Facing</option>
-                              <option value="West Facing">West Facing</option>
-                              <option value="West Facing">Not Applicable</option>
+                              {
+                                facing.map((item) => (
+                                  <option>{item.plotFacing}</option>
+                                ))
+                              }
                             </select>
                           </div>
                         </div>
@@ -431,14 +385,12 @@ const NewLead = () => {
                             </label>
                             <select
                               className="form-control show-tick"
-                              value={newLead.projectLocation}
-                              onChange={(e) => onChangeHandler('projectLocation', e.target.value)}
+                              value={leadState.projectLocation}
+                              onChange={(e) => onChangeHandler("projectLocation", e.target.value)}
                             >
                               {
                                 location.map((item) => (
-                                  <option>
-                                    {item.pLocation}
-                                  </option>
+                                  <option>{item.pLocation}</option>
                                 ))
                               }
                             </select>
@@ -454,8 +406,8 @@ const NewLead = () => {
                           <input
                             type="text"
                             className="form-control"
-                            value={newLead.expectedSqFt}
-                            onChange={(e) => onChangeHandler('expectedSqFt', e.target.value)}
+                            value={leadState.expectedSqFt}
+                            onChange={(e) => onChangeHandler("expectedSqFt", e.target.value)}
                           />
                         </div>
                       </div>
@@ -466,10 +418,10 @@ const NewLead = () => {
                             Expected Budget
                           </label>
                           <input
-                            type="text"
+                            type="number"
                             className="form-control"
-                            value={newLead.expectedBudget}
-                            onChange={(e) => onChangeHandler('expectedBudget', e.target.value)}
+                            value={leadState.expectedBudget}
+                            onChange={(e) => onChangeHandler("expectedBudget", e.target.value)}
                           />
                         </div>
                       </div>
@@ -496,9 +448,15 @@ const NewLead = () => {
                         </label>
                         <select
                           className="form-control show-tick"
-                          value={newLead.leadSource}
-                          onChange={(e) => onChangeHandler('leadSource', e.target.value)}
-                        ></select>
+                          value={leadState.leadSource}
+                          onChange={(e) => onChangeHandler("leadSource", e.target.value)}
+                        >
+                          {
+                            source.map((item) => (
+                              <option>{item.sourceName}</option>
+                            ))
+                          }
+                        </select>
                         <div className="invalid-feedback">
                           Please provide a 'LeadSource'
                         </div>
@@ -512,8 +470,8 @@ const NewLead = () => {
                         </label>
                         <select
                           className="form-control show-tick"
-                          value={newLead.leadStatus}
-                          onChange={(e) => onChangeHandler('leadStatus', e.target.value)}
+                          value={leadState.leadStatus}
+                          onChange={(e) => onChangeHandler("leadStatus", e.target.value)}
                         >
                           <option value="">Select Status</option>
                           <option value="Remind Later">Remind Later</option>
@@ -533,8 +491,8 @@ const NewLead = () => {
                         <input
                           type="date"
                           className="form-control"
-                          value={newLead.followup}
-                          onChange={(e) => onChangeHandler('followup', e.target.value)}
+                          value={leadState.followup}
+                          onChange={(e) => onChangeHandler("followup", e.target.value)}
                         />
                       </div>
                     </div>
@@ -546,8 +504,8 @@ const NewLead = () => {
                         </label>
                         <select
                           className="form-control show-tick"
-                          value={newLead.typeOfPurchase}
-                          onChange={(e) => onChangeHandler('typeOfPurchase', e.target.value)}
+                          value={leadState.purposeOfBuying}
+                          onChange={(e) => onChangeHandler("purposeOfBuying", e.target.value)}
                         >
                           <option value="">Type of purchase</option>
                           <option value="Loan">Loan</option>
@@ -564,8 +522,8 @@ const NewLead = () => {
                         <textarea
                           rows={3}
                           className="form-control"
-                          value={newLead.reason}
-                          onChange={(e) => onChangeHandler('reason', e.target.value)}
+                          value={leadState.reason}
+                          onChange={(e) => onChangeHandler("reason", e.target.value)}
                         />
                       </div>
                     </div>
@@ -586,8 +544,8 @@ const NewLead = () => {
                       <div className="form-group">
                         <h6>Mode of Transport</h6>
                         <select className="form-control"
-                          value={newLead.modeOfTransport}
-                          onChange={(e) => onChangeHandler('modeOfTransport', e.target.value)}
+                          value={leadState.modeOfTransport}
+                          onChange={(e) => onChangeHandler("modeOfTransport", e.target.value)}
                         >
                           <option value="">---Select Mode of Transport---</option>
                           <option value="Own vehicle">Own vehicle</option>
@@ -602,8 +560,8 @@ const NewLead = () => {
                       <input
                         type="text"
                         className="form-control"
-                        value={newLead.pickupLocation}
-                        onChange={(e) => onChangeHandler('pickupLocation', e.target.value)}
+                        value={leadState.pickupLocation}
+                        onChange={(e) => onChangeHandler("pickupLocation", e.target.value)}
                       />
                     </div>
                     <div className="col-sm-4">
@@ -614,8 +572,8 @@ const NewLead = () => {
                       <input
                         type="datetime-local"
                         className="form-control"
-                        value={newLead.pickupTime}
-                        onChange={(e) => onChangeHandler('pickupTime', e.target.value)}
+                        value={leadState.pickupTime}
+                        onChange={(e) => onChangeHandler("pickupTime", e.target.value)}
                       />
                     </div>
                   </div>
@@ -635,20 +593,24 @@ const NewLead = () => {
                     type="submit"
                     className="btn btn-primary"
                     form="leadForm"
+                    value="Submit"
                     onClick={addNewLead}
                   >
                     Save
                   </button>
-                  <a href="/skandha/index.html" className="btn btn-primary">
+                  <a href="/skandha/index.html" className="btn btn-secondary">
                     Cancel
                   </a>
                 </div>
+                <ToastContainer autoClose={900} />
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
+
+
   )
 }
 
